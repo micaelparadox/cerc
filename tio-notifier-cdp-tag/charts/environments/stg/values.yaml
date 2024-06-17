@@ -1,0 +1,126 @@
+# Caso deseje adicionar configurações, veja a documentação abaixo:
+# https://dev.azure.com/Cerc-Recebiveis/Corporate/_git/Helm?path=/charts/cercHelm/values.yaml
+# https://dev.azure.com/Cerc-Recebiveis/Corporate/_git/Helm?path=/charts/cercHelm/templates
+---
+globalValues:
+  workloadType: Deployment
+  typeIngressGceOrKong: nginx #defaul definido por devops
+  namespace: financial-asset
+  port:
+    number: 80
+    targetPort: 8080
+    protocol: TCP
+  
+  hostsDNS:
+    - tio-notifier-cdp-tag.k8s.receivables.stg.cerc.com
+
+  specType: NodePort
+  enableServiceNeg: false
+  enableFrontendConfigManifest: false
+  enableBackendConfigManifest: false
+  enableConfigmapManifest: false
+  enableIngressManifest: true
+  enableExternalDNS: true
+  enableCronjobManifest: false
+  enableHpaManifest: true
+  enableCertificateManifest: false
+  enableInternalCertificateManifest: true
+  enableSecretsManifest: false
+  enableExternalSecretsManifest: true
+  enableServiceAccountManifest: true
+  enablePodMonitoringManifest: false #TODO: Habilitar quando o Prometheus estiver configurado
+
+deploymentManifest:
+  annotations: {}
+  replicaCount: 1
+  nodePool:
+    enable: false
+    name:
+  updateStrategy:
+    type: RollingUpdate
+
+
+  livenessProbe:
+    enable: true
+    type: http
+    failureThreshold: 3
+    httpGet:
+      path: /actuator/health
+      port: 8080
+      scheme: HTTP
+    periodSeconds: 30
+    successThreshold: 1
+    timeoutSeconds: 5
+    initialDelaySeconds: 120
+
+
+
+  readinessProbe:
+    enable: true
+    type: http
+    failureThreshold: 3
+    httpGet:
+      path: /actuator/health
+      port: 8080
+      scheme: HTTP
+    periodSeconds: 30
+    successThreshold: 1
+    timeoutSeconds: 5
+    initialDelaySeconds: 120
+
+
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+
+
+envToDeployment:
+  AUTH_URL: https://internal.cadastra.k8s.receivables.stg.cerc.com/profile
+  MERCHANT_URL: https://internal.cadastra.k8s.receivables.stg.cerc.com/ap001
+  receivable_URL: http://10.19.32.20
+  BOOKKEEPING_PROJECT_ID: cerc2-book-stg-01
+  SUBSCRIPTION_PROJECT_ID: cerc2-book-stg-01
+  SUBSCRIPTION_NAME: sub-tio-cdp-notifier-tag
+  SUBSCRIPTION_MAX_MESSAGES: 30
+
+
+ingressManifest:
+  name: tio-notifier-cdp-tag-ingress
+  hostDNS: tio-notifier-cdp-tag.k8s.receivables.stg.cerc.com
+  class: "nginx"
+  annotations: {}
+  paths:
+    - path: /
+      pathType: Prefix
+  tls: []
+
+
+
+serviceAccountManifest:
+  serviceAccountName: tio-notifier-cdp-tag
+  gcpProjectId: cerc2-tio-stg-01
+
+
+podMonitoringManifest:
+  endpoints:
+    - port: 8080
+      path: /actuator/prometheus
+      interval: 120s
+
+
+horizontalPodAutoScalerManifest:
+  apiVersion: autoscaling/v2
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 90
+
+
+externalSecretsManifest:
+  secretsToSync:
+    TIO_GENERAL: tio-general-tio-notifier-cdp-tag # env-var name: CERC_BASIC_OAUTH
+    GKE_REVERSE_PROXY: gke-reverse-proxy-tio-notifier-cdp-tag # env-var name: REVERSE_PROXY_HTTP_AUTH

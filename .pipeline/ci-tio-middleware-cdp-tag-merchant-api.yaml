@@ -1,0 +1,26 @@
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Corporate/TemplatesDevops
+      ref: refs/heads/melhorias
+
+trigger:
+  branches:
+    include:
+    - 'main'
+  paths:
+    include:
+      - 'tio-middleware-cdp-tag-merchant-api'
+    exclude:
+    - '.pipeline'
+    - 'charts'
+
+stages:
+  - template: template-pipeline.yaml@templates
+    parameters:
+      codeScan: 'slscan'
+      GitStrategy: 'trunk'
+      monorepo_path: 'tio-middleware-cdp-tag-merchant-api'
+

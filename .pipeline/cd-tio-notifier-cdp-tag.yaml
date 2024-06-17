@@ -1,0 +1,73 @@
+resources:
+  repositories:
+  - repository: templates
+    type: git
+    name: Corporate/TemplatesDevops
+    ref: 'refs/heads/melhorias'
+
+  pipelines:
+  - pipeline: tio-notifier-cdp-tag-ci
+    project: 'Transaction IO'
+    source: tio-notifier-cdp-tag-ci
+    trigger:
+      branches:
+        include:
+        - 'main'
+
+variables:
+- group: JiraVault
+
+trigger: none
+
+pool:
+  name: azure-cerc-stg
+
+stages:
+  - stage: Init
+    jobs:
+    - job: Init
+      steps:
+      - script: |
+          echo Init Deploy
+        displayName: 'Init job'
+  - template: Release/azure-pipeline.yaml@templates
+    parameters:
+      k8sServiceConnection: 'gke-receivables-01-stg'
+      releaseName: 'tio-notifier-cdp-tag'
+      setValues: ''
+      stage: stg
+      approvers: 'approvers_stg'
+      pipelineCi: 'tio-notifier-cdp-tag-ci'
+      stageDepends: Init
+      chartPath: 'tio-notifier-cdp-tag/charts/'
+      varGroup: 'none'
+      branchDeploy:
+      - 'refs/heads/main'
+
+  - template: Release/azure-pipeline.yaml@templates
+    parameters:
+      k8sServiceConnection: 'gke-receivables-01-int'
+      releaseName: 'tio-notifier-cdp-tag'
+      setValues: ''
+      stage: int
+      approvers: 'approvers_int'
+      stageDepends: stg
+      pipelineCi: 'tio-notifier-cdp-tag-ci'
+      chartPath: 'tio-notifier-cdp-tag/charts/'
+      varGroup: 'none'
+      branchDeploy:
+      - 'refs/heads/main'
+
+  - template: Release/azure-pipeline.yaml@templates
+    parameters:
+      k8sServiceConnection: 'gke-receivables-01-prd'
+      releaseName: 'tio-notifier-cdp-tag'
+      setValues: ''
+      stage: prd
+      approvers: 'approvers_prd'
+      chartPath: 'tio-notifier-cdp-tag/charts/'
+      stageDepends: int
+      pipelineCi: 'tio-notifier-cdp-tag-ci'
+      varGroup: 'none'
+      branchDeploy:
+      - 'refs/heads/main'

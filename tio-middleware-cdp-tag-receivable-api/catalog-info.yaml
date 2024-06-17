@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "tio-middleware-cdp-tag-merchant-api"
+  title: "Middleware API para layouts externos"
+  description: "Api de processamento de APs do TIO com conversor de layouts externos a CERC"
+  tags:
+    - java
+    - maven
+    - microservice
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    sonarqube.org/project-key:  "tio-middleware-cdp-tag-merchant-api"
+    dev.azure.com/project-repo: "Transaction IO/tio-middleware-cdp-tag-merchant-api"
+spec:
+  type: service
+  lifecycle: experimental
+  system:  "system:default/financial-asset"
+  owner: "group:default/team-transaction-io-platform"

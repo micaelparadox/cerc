@@ -1,0 +1,125 @@
+# Caso deseje adicionar configurações, veja a documentação abaixo:
+# https://dev.azure.com/Cerc-Recebiveis/Corporate/_git/Helm?path=/charts/cercHelm/values.yaml
+# https://dev.azure.com/Cerc-Recebiveis/Corporate/_git/Helm?path=/charts/cercHelm/templates
+---
+globalValues:
+  workloadType: Deployment
+  typeIngressGceOrKong: nginx #defaul definido por devops
+  namespace: financial-asset
+  port:
+    number: 80
+    targetPort: 8080
+    protocol: TCP
+  
+  hostsDNS:
+    - tio-middleware-cdp-tag-receivable-api.k8s.receivables.prd.cerc.com
+  
+  specType: Loadbalancer 
+  enableServiceNeg: true
+  enableFrontendConfigManifest: false
+  enableBackendConfigManifest: false
+  enableConfigmapManifest: true
+  enableIngressManifest: true #obrigatorio
+  enableExternalDNS: true #verificar com time de devops se isso não abre para internet
+  enableCronjobManifest: false
+  enableHpaManifest: true #obrigatório
+  enableCertificateManifest: false
+  enableInternalCertificateManifest: false #defaul definido por devops
+  enableSecretsManifest: false #obrigatorio default true
+  enableExternalSecretsManifest: true #obrigatorio default true
+  enableServiceAccountManifest: true #obrigatorio, default application name
+  enablePodMonitoringManifest: true
+
+# nameOverride: ""
+# fullnameOverride: ""
+
+deploymentManifest:
+  initContainerEnabled: true #old: true
+  annotations: {}
+  replicaCount: 1
+  nodePool:
+    enable: false
+    name:
+  updateStrategy:
+    type: RollingUpdate
+  # image:
+  #   pullPolicy: IfNotPresent
+  #   repository: "" 
+
+
+  livenessProbe:
+    enable: true
+    type: http
+    failureThreshold: 3
+    httpGet:
+      path: /actuator/health #obrigatorio default /actuator/health
+      port: 8080
+      scheme: HTTP
+    periodSeconds: 30
+    successThreshold: 1
+    timeoutSeconds: 5
+    initialDelaySeconds: 120
+
+
+
+  readinessProbe:
+    enable: true
+    type: http
+    failureThreshold: 3
+    httpGet:
+      path: /actuator/health #obrigatorio default /actuator/health
+      port: 8080
+      scheme: HTTP
+    periodSeconds: 30
+    successThreshold: 1
+    timeoutSeconds: 5
+    initialDelaySeconds: 120
+
+
+  resources:
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+    requests:
+      cpu: "1"
+      memory: "2Gi" 
+
+
+envToDeployment:
+  AUTH_URL: http://10.219.32.21
+  BOOKKEEPING_PROJECT_ID: cerc2-book-prd-01
+
+ingressManifest:
+  name: tio-middleware-cdp-tag-receivable-api-ingress
+  hostDNS: tio-middleware-cdp-tag-receivable-api.k8s.receivables.prd.cerc.com
+  class: "nginx"
+  annotations: {}
+  paths:
+    - path: /estabelecimento
+      pathType: Prefix #default prefix
+  tls: []
+
+      
+#
+serviceAccountManifest:
+  serviceAccountName: cdp-tag-receivable-api #obrigatorio
+  gcpProjectId: cerc2-tio-prd-01 #obrigatorio
+#
+
+podMonitoringManifest:
+  endpoints:
+    - port: 8080
+      path: /actuator/prometheus
+      interval: 120s
+
+
+horizontalPodAutoScalerManifest:
+  apiVersion: autoscaling/v2
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 90
+
+externalSecretsManifest:
+  secretsToSync:
+    TIO_GENERAL: tio-middleware-cdp-tag-receivable-api

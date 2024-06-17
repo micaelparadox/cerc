@@ -1,0 +1,11 @@
+apiVersion: v2
+name: tio-notifier-cdp-tag
+description: CERC helm chart
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+dependencies:
+- name: cercHelm
+  version: 3.4
+  repository: gs://cerc-helm-repository-southamerica-east1
+

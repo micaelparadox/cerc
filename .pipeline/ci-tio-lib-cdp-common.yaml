@@ -1,0 +1,25 @@
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Corporate/TemplatesDevops
+      ref: refs/heads/melhorias
+
+trigger:
+  branches:
+    include:
+    - 'main'
+  paths:
+    include:
+      - 'tio-lib-cdp-common'
+    exclude:
+    - '.pipeline'
+
+stages:
+  - template: template-pipeline.yaml@templates
+    parameters:
+      codeScan: 'slscan'
+      GitStrategy: 'trunk'
+      monorepo_path: 'tio-lib-cdp-common'
+      publishFeedName: 'cerc-utils'

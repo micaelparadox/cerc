@@ -1,0 +1,26 @@
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Corporate/TemplatesDevops
+      ref: refs/heads/melhorias
+
+trigger:
+  branches:
+    include:
+    - 'main'
+  paths:
+    include:
+      - 'tio-notifier-cdp-tag'
+    exclude:
+    - '.pipeline'
+    - 'charts'
+
+stages:
+  - template: template-pipeline.yaml@templates
+    parameters:
+      codeScan: 'slscan'
+      GitStrategy: 'trunk'
+      monorepo_path: 'tio-notifier-cdp-tag'
+

@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  tio-middleware-cdp-tag-merchant-api:
+    image: tio-middleware-cdp-tag-merchant-api
+    restart: always
+    build: .
+    environment:
+      TZ: "America/Sao_Paulo"
+    ports:
+      - 8080:8080
+    
+    
+    command: java -jar /app/app.jar
+    

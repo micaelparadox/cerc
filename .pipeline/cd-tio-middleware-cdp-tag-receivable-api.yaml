@@ -1,0 +1,73 @@
+resources:
+  repositories:
+  - repository: templates
+    type: git
+    name: Corporate/TemplatesDevops
+    ref: 'refs/heads/melhorias'
+
+  pipelines:
+  - pipeline: tio-middleware-cdp-tag-receivable-api-ci
+    project: 'Transaction IO'
+    source: tio-middleware-cdp-tag-receivable-api-ci
+    trigger:
+      branches:
+        include:
+        - 'main'
+
+variables:
+- group: JiraVault
+
+trigger: none
+
+pool:
+  name: azure-cerc-stg
+
+stages:
+  - stage: Init
+    jobs:
+    - job: Init
+      steps:
+      - script: |
+          echo Init Deploy
+        displayName: 'Init job'
+  - template: Release/azure-pipeline.yaml@templates
+    parameters:
+      k8sServiceConnection: 'gke-receivables-01-stg'
+      releaseName: 'tio-middleware-cdp-tag-receivable-api'
+      setValues: ''
+      stage: stg
+      approvers: 'approvers_stg'
+      pipelineCi: 'tio-middleware-cdp-tag-receivable-api-ci'
+      stageDepends: Init
+      chartPath: 'tio-middleware-cdp-tag-receivable-api/charts/'
+      varGroup: 'none'
+      branchDeploy:
+      - 'refs/heads/main'
+
+  - template: Release/azure-pipeline.yaml@templates
+    parameters:
+      k8sServiceConnection: 'gke-receivables-01-int'
+      releaseName: 'tio-middleware-cdp-tag-receivable-api'
+      setValues: ''
+      stage: int
+      approvers: 'approvers_int'
+      stageDepends: stg
+      pipelineCi: 'tio-middleware-cdp-tag-receivable-api-ci'
+      chartPath: 'tio-middleware-cdp-tag-receivable-api/charts/'
+      varGroup: 'none'
+      branchDeploy:
+      - 'refs/heads/main'
+
+  - template: Release/azure-pipeline.yaml@templates
+    parameters:
+      k8sServiceConnection: 'gke-receivables-01-prd'
+      releaseName: 'tio-middleware-cdp-tag-receivable-api'
+      setValues: ''
+      stage: prd
+      approvers: 'approvers_prd'
+      chartPath: 'tio-middleware-cdp-tag-receivable-api/charts/'
+      stageDepends: int
+      pipelineCi: 'tio-middleware-cdp-tag-receivable-api-ci'
+      varGroup: 'none'
+      branchDeploy:
+      - 'refs/heads/main'

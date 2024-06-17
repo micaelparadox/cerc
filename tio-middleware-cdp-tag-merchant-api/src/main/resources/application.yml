@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: tio-middleware-cdp-tag-merchant-api
+  profiles:
+    active: ${PROFILE:local}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI:https://api.stg.cerc.com/}
+          jwk-set-uri: ${JWKS_URI:https://api.stg.cerc.com/.well-known/jwks.json}
+  cloud:
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false
+
+management:
+  info:
+    env:
+      enabled: true
+    git:
+      enabled: true
+      mode: full
+
+  endpoints:
+    web:
+      exposure:
+        include: info,health,metrics,env,loggers,prometheus
+
+  metrics:
+    enable:
+      jvm: false
+      tomcat: false
+      spring: false
+      process: false
+      executor: false
+      logback: false
+      http: false
+      system: false
+      application: false
+      disk: false
+  endpoint:
+    health:
+      show-details: always
+      show-components: when-authorized
+  health:
+    refresh:
+      enabled: false
+  simple:
+    metrics:
+      export:
+        enabled: true
+info:
+  service:
+    name: tio-middleware-cdp-tag-merchant-api
+    team: group:default/team-transaction-io-platform
+    responsible:
+      name: group:default/team-transaction-io-platform
+      contact: group:default/team-transaction-io-platform
+
+cadastra:
+  reverse-proxy-auth-secret: Basic ${REVERSE_PROXY_HTTP_AUTH}
+  auth:
+    url: ${AUTH_URL:https://internal.cadastra.k8s.receivables.stg.cerc.com/profile}
+    app-authentication-basic-auth-secret: ${CERC_BASIC_OAUTH}
+  merchant:
+    url: ${MERCHANT_URL:https://internal.cadastra.k8s.receivables.stg.cerc.com/ap001}

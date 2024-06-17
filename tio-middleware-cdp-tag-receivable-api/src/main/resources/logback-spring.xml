@@ -1,0 +1,14 @@
+<configuration>
+    <include resource="com/google/cloud/spring/logging/logback-json-appender.xml"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %class \(%thread\) %-5level [%logger{36}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE_JSON"/>
+    </root>
+
+</configuration>

@@ -1,0 +1,51 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false
+
+management:
+  info:
+    env:
+      enabled: true
+    git:
+      enabled: true
+      mode: full
+
+  endpoints:
+    web:
+      exposure:
+        include: info,health,metrics,env,loggers
+  metrics:
+    export:
+      simple:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
+      show-components: when-authorized
+  health:
+    refresh:
+      enabled: false
+
+info:
+  service:
+    name: tio-middleware-cdp-tag-merchant-api
+    team: group:default/team-transaction-io-platform
+    responsible:
+      name: group:default/team-transaction-io-platform
+      contact: group:default/team-transaction-io-platform
+
+logging:
+   level:
+      root: INFO
+
+cadastra:
+  service:
+    url: ${AUTH_URL:https://cad-stg.cerc.inf.br}
+    basic-auth: ${CERC_BASIC_OAUTH}
+
+pubsub:
+  bookkeeping:
+    project-id: ${BOOKKEEPING_PROJECT_ID:cerc2-book-stg-01}
